@@ -1,8 +1,11 @@
 import puppeteer from "puppeteer";
 import fs from "fs";
 import { getCurrentTimestamp } from "../lib/timestamp.js";
-import { runHwInteractions } from "./helloWorldInteractions.js";
-import { wait } from "../lib/utils.js";
+import { runGbInteractions } from "./guestbookInteractions.js";
+
+// const url = 'https://nextjs-interactive.vercel.app/';
+// const url = 'https://qwik-interactive.vercel.app/';
+const url = "https://react-interactive.vercel.app/";
 
 export const runCoverage = async (framework, interaction) => {
   const browser = await puppeteer.launch({ headless: true });
@@ -18,13 +21,12 @@ export const runCoverage = async (framework, interaction) => {
     page.coverage.startCSSCoverage(),
   ]);
 
-  await page.goto(`https://${framework}-hello-world.vercel.app/`, {
+  await page.goto(`https://${framework}-interactive.vercel.app/`, {
     waitUntil: "networkidle0",
   });
 
   if (interaction) {
-    await runHwInteractions(page);
-    await wait(1000);
+    await runGbInteractions(page);
   }
 
   const [jsCoverage, cssCoverage] = await Promise.all([
@@ -32,6 +34,7 @@ export const runCoverage = async (framework, interaction) => {
     page.coverage.stopCSSCoverage(),
   ]);
 
+  // Calculate JS coverage
   let totalJsBytes = 0;
   let usedJsBytes = 0;
   jsCoverage.forEach((entry) => {
@@ -41,6 +44,7 @@ export const runCoverage = async (framework, interaction) => {
     });
   });
 
+  // Calculate CSS coverage
   let totalCssBytes = 0;
   let usedCssBytes = 0;
   cssCoverage.forEach((entry) => {
@@ -50,10 +54,22 @@ export const runCoverage = async (framework, interaction) => {
     });
   });
 
+  // Calculate totals
   const totalBytes = totalJsBytes + totalCssBytes;
   const usedBytes = usedJsBytes + usedCssBytes;
   const unusedJsBytes = totalJsBytes - usedJsBytes;
   const unusedCssBytes = totalCssBytes - usedCssBytes;
+
+  // Prepare CSV data
+
+  // await flow.endTimespan();
+
+  // await flow.navigate(
+  //     // await page.click("#klickBurger").then((res) => console.log(res));
+  //     // const dashboard = await page.waitForSelector('p#linkToDashboard');
+  //     // await dashboard.click()
+  //     "http://localhost:4173/dashboard/"
+  // );
 
   await browser.close();
   return {
@@ -66,23 +82,14 @@ export const runCoverage = async (framework, interaction) => {
   };
 };
 
-const frameworks = [
-  "qwik-ssr",
-  "nextjs-ssr",
-  "react-csr",
-  "solidjs-ssr",
-  "solidjs-csr",
-];
-// const frameworks = ["solidjs-ssr", "solidjs-csr"];
+const frameworks = ["qwik", "nextjs", "react", "solidjs", "solidjs-csr"];
 
 const interaction = true;
-const numberOfRuns = 5;
+
 for (let framework of frameworks) {
-  const outputFolder = `/Users/stefan/Library/Mobile Documents/com~apple~CloudDocs/Studium Media Engineering/Bachelorarbeit/Messwerte/HelloWorldApps/${framework}/coverage_2/${interaction ? "with_interaction" : "page_load"}`;
-  let meansTotal = [];
-  let meansUnused = [];
-  for (let i = 0; i < numberOfRuns; i++) {
+  for (let i = 0; i < 5; i++) {
     console.log(`Running coverage for ${framework}`);
+    const outputFolder = `/Users/stefan/Library/Mobile Documents/com~apple~CloudDocs/Studium Media Engineering/Bachelorarbeit/Messwerte/Interactive App/${framework}/coverage/${interaction ? "with_interaction" : "page_load"}`;
 
     const coverageData = await runCoverage(framework, interaction);
     const csvData = [
@@ -111,8 +118,7 @@ for (let framework of frameworks) {
         `${(((coverageData.totalBytes - coverageData.usedBytes) / coverageData.totalBytes) * 100).toFixed(2)} %`,
       ],
     ];
-    meansTotal.push(coverageData.totalBytes);
-    meansUnused.push(coverageData.totalBytes - coverageData.usedBytes);
+
     const csvContent = csvData.map((e) => e.join(",")).join("\n");
 
     if (!fs.existsSync(outputFolder)) {
@@ -123,18 +129,4 @@ for (let framework of frameworks) {
       csvContent,
     );
   }
-
-  const meanCsvData = [
-    ["Mean Total Bytes", "Mean Unused Bytes"],
-    [
-      meansTotal.reduce((a, b) => a + b, 0) / numberOfRuns,
-      meansUnused.reduce((a, b) => a + b, 0) / numberOfRuns,
-    ],
-  ];
-  const meanCsvContent = meanCsvData.map((e) => e.join(",")).join("\n");
-
-  fs.writeFileSync(
-    `${outputFolder}/${framework}-mean-coverage-${interaction ? "with_interaction" : "page_load"}-${getCurrentTimestamp()}.csv`,
-    meanCsvContent,
-  );
 }

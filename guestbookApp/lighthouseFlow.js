@@ -1,15 +1,19 @@
 import puppeteer from "puppeteer";
 import { startFlow } from "lighthouse";
 import { clearSiteData, wait } from "../lib/utils.js";
-import { runHwInteractions } from "./helloWorldInteractions.js";
+import { runGbInteractions } from "./guestbookInteractions.js";
 
-export const runHelloWorldFlow = async (
+// const url = 'https://nextjs-interactive.vercel.app/';
+const url = "https://qwik-interactive.vercel.app/";
+
+export const runInteractiveFlow = async (
   url,
   lighthouseConfig,
   cacheOption,
   runs,
 ) => {
   const browser = await puppeteer.launch({ headless: true });
+
   const page = await browser.newPage();
   const flow = await startFlow(page, lighthouseConfig);
   await page.goto(url, {
@@ -24,12 +28,11 @@ export const runHelloWorldFlow = async (
     }
 
     await flow.navigate(url);
+
     await flow.startTimespan();
-    await runHwInteractions(page);
+    await runGbInteractions(page);
     await flow.endTimespan();
   }
-
   await browser.close();
-
   return flow;
 };
