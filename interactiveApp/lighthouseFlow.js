@@ -1,28 +1,6 @@
 import puppeteer from 'puppeteer';
 import {startFlow} from 'lighthouse';
 
-const throttlingOptions = {
-    throughputKbps: 600,
-    cpuSlowdownMultiplier: 4,
-    requestLatencyMs: 400,
-    downloadThroughputKbps: 600,
-    uploadThroughputKbps: 750,
-}
-
-const lighthouseConfig = {
-    config: {
-        extends: 'lighthouse:default',
-        settings: {
-            onlyCategories: ["performance"],
-            throttling: {
-                throttlingOptions
-            },
-            // disableStorageReset: true,
-            disableStorageReset: false,
-            throttlingMethod: 'provided',
-        }
-    }
-}
 
 // const url = 'https://nextjs-interactive.vercel.app/';
 const url = 'https://qwik-interactive.vercel.app/';
@@ -37,15 +15,19 @@ export const runFlow = async (url, lighthouseConfig, browser) => {
     const flow = await startFlow(page,
         lighthouseConfig
     );
+    await page.goto(url, {
+        waitUntil: 'networkidle0',
+    });
+
 
     await flow.navigate(url);
 
     await flow.startTimespan();
 
-    await Promise.all([
-        page.coverage.startJSCoverage(),
-        page.coverage.startCSSCoverage(),
-    ]);
+    // await Promise.all([
+    //     page.coverage.startJSCoverage(),
+    //     page.coverage.startCSSCoverage(),
+    // ]);
 
     await page.click('#klick1');
 
@@ -84,10 +66,23 @@ export const runFlow = async (url, lighthouseConfig, browser) => {
     await new Promise((resolve, reject) => setTimeout(resolve, 2000));
     // await page.click('#klick13');
 
+    await page.click("#klickBurger").then((res) => console.log(res));
+    const dashboard = await page.waitForSelector('p#linkToDashboard');
+        await dashboard.click();
+        await new Promise((resolve, reject) => setTimeout(resolve, 5000));
     await flow.endTimespan();
 
+    // await flow.startNavigation();
+    // await dashboard.click()
+    // await flow.endNavigation();
+    // await flow.navigate(url + "dashboard/")
 
-// await flow.navigate(
+    // await flow.navigate(async () => {
+    //     await dashboard.click();
+    //     await new Promise((resolve, reject) => setTimeout(resolve, 2000));
+    // });
+
+
 //     // await page.click("#klickBurger").then((res) => console.log(res));
 //     // const dashboard = await page.waitForSelector('p#linkToDashboard');
 //     // await dashboard.click()

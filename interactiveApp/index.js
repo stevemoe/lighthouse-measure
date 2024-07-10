@@ -1,27 +1,12 @@
 import fs from 'fs';
-import readline from 'readline';
 import {getLhrFilenamePrefix} from "lighthouse/report/generator/file-namer.js";
 import {runFlow} from "./lighthouseFlow.js";
 import puppeteer from "puppeteer";
-import * as throttle from '@sitespeed.io/throttle'
-import {selectThrottlingOption} from "../lib/selectFunctions.js";
-
-
-const frameworks = ["qwik", "nextjs", "react", "solidjs", "solidjs-csr"];
-const numberOfRuns = 10;
+import {selectFramework, selectThrottlingOption} from "../lib/selectFunctions.js";
 
 async function runLighthouse(framework, cacheOption, networkSpeed) {
     const url = `https://${framework}-interactive.vercel.app/`;
     const outputFolder = `/Users/stefan/Library/Mobile Documents/com~apple~CloudDocs/Studium Media Engineering/Bachelorarbeit/Messwerte/Interactive App/${framework}/${networkSpeed}/${cacheOption}`;
-    // console.log("browser launched");
-    // const chrome = await chromeLauncher.launch({chromeFlags: ['--headless=new']});
-    // const options = {
-    //     logLevel: 'info',
-    //     output: ['html', 'json'],
-    //     onlyCategories: ['performance'],
-    //     // port: chrome.port,
-    //     disableStorageReset: cacheOption === 'cache'
-    // };
     const lighthouseConfig = {
         config: {
             extends: 'lighthouse:default',
@@ -29,14 +14,11 @@ async function runLighthouse(framework, cacheOption, networkSpeed) {
                 logLevel: 'info',
                 output: ['html', 'json'],
                 onlyCategories: ["performance"],
-                // throttling: {
-                //     // throttlingOptions
-                // },
                 throttling: {
-                    requestLatencyMs: 0,
-                    downloadThroughputKbps: 0,
-                    uploadThroughputKbps: 0,
-                    cpuSlowdownMultiplier: 4,
+                    // requestLatencyMs: 0,
+                    // downloadThroughputKbps: 0,
+                    // uploadThroughputKbps: 0,
+                    cpuSlowdownMultiplier: 10.2,
                 },
                 disableStorageReset: cacheOption === 'cache',
                 throttlingMethod: 'provided',
@@ -48,7 +30,7 @@ async function runLighthouse(framework, cacheOption, networkSpeed) {
         fs.mkdirSync(outputFolder, {recursive: true});
     }
 
-    const browser = await puppeteer.launch({headless: true});
+    const browser = await puppeteer.launch({headless: false});
 
 
     for (let i = 1; i <= numberOfRuns; i++) {
@@ -68,8 +50,11 @@ async function runLighthouse(framework, cacheOption, networkSpeed) {
     await browser.close();
 }
 
+const frameworks = ["qwik", "nextjs", "react", "solidjs", "solidjs-csr"];
+const numberOfRuns = 2;
+
 (async () => {
-    const framework = await selectFramework();
+    const framework = await selectFramework(frameworks);
     // const cacheOption = await selectCacheOption();
     const cacheOptions = ["cache", "no-cache"]
     const throttlingOption = await selectThrottlingOption();
