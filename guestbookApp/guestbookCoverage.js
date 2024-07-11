@@ -3,11 +3,22 @@ import fs from "fs";
 import { getCurrentTimestamp } from "../lib/timestamp.js";
 import { runGbInteractions } from "./guestbookInteractions.js";
 
-// const url = 'https://nextjs-interactive.vercel.app/';
-// const url = 'https://qwik-interactive.vercel.app/';
-const url = "https://react-interactive.vercel.app/";
+// Code aus Puppeteer Docs
+// https://pptr.dev/api/puppeteer.coverage
 
-export const runCoverage = async (framework, interaction) => {
+function calcCoverage(coverage) {
+  let totalBytes = 0;
+  let usedBytes = 0;
+  coverage.forEach((entry) => {
+    totalBytes += entry.text.length;
+    entry.ranges.forEach((range) => {
+      usedBytes += range.end - range.start - 1;
+    });
+  });
+  return [totalBytes, usedBytes];
+}
+
+const runCoverage = async (framework, interaction) => {
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
   await page.setViewport({
@@ -34,42 +45,15 @@ export const runCoverage = async (framework, interaction) => {
     page.coverage.stopCSSCoverage(),
   ]);
 
-  // Calculate JS coverage
-  let totalJsBytes = 0;
-  let usedJsBytes = 0;
-  jsCoverage.forEach((entry) => {
-    totalJsBytes += entry.text.length;
-    entry.ranges.forEach((range) => {
-      usedJsBytes += range.end - range.start - 1;
-    });
-  });
+  console.log(JSON.stringify(jsCoverage));
+  // console.log(cssCoverage);
+  const [totalJsBytes, usedJsBytes] = calcCoverage(jsCoverage);
+  const [totalCssBytes, usedCssBytes] = calcCoverage(cssCoverage);
 
-  // Calculate CSS coverage
-  let totalCssBytes = 0;
-  let usedCssBytes = 0;
-  cssCoverage.forEach((entry) => {
-    totalCssBytes += entry.text.length;
-    entry.ranges.forEach((range) => {
-      usedCssBytes += range.end - range.start - 1;
-    });
-  });
-
-  // Calculate totals
   const totalBytes = totalJsBytes + totalCssBytes;
   const usedBytes = usedJsBytes + usedCssBytes;
   const unusedJsBytes = totalJsBytes - usedJsBytes;
   const unusedCssBytes = totalCssBytes - usedCssBytes;
-
-  // Prepare CSV data
-
-  // await flow.endTimespan();
-
-  // await flow.navigate(
-  //     // await page.click("#klickBurger").then((res) => console.log(res));
-  //     // const dashboard = await page.waitForSelector('p#linkToDashboard');
-  //     // await dashboard.click()
-  //     "http://localhost:4173/dashboard/"
-  // );
 
   await browser.close();
   return {

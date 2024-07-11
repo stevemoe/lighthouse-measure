@@ -12,7 +12,7 @@ export const runInteractiveFlow = async (
   cacheOption,
   runs,
 ) => {
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
   const flow = await startFlow(page, lighthouseConfig);
 

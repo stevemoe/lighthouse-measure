@@ -68,7 +68,9 @@ async function runLighthouse(
   // const cacheOption = await selectCacheOption();
   const cacheOptions = ["cache", "no-cache"];
   const throttlingOption = await selectThrottlingOption();
+  console.log(throttlingOption);
   await throttle.start(throttlingOption[1]);
+  // try {
   for (const cacheOption of cacheOptions) {
     console.log(
       `Testing ${framework} with ${cacheOption} and ${throttlingOption[0]}`,
@@ -86,5 +88,9 @@ async function runLighthouse(
       );
     }
   }
+  // } catch (error) {
+  //   console.error("Mit Fehler abgebrochen: ", error);
+  // }
   await throttle.stop();
+  console.log("Throttle stopped");
 })();

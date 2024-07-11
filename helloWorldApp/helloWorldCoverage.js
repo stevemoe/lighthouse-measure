@@ -4,6 +4,21 @@ import { getCurrentTimestamp } from "../lib/timestamp.js";
 import { runHwInteractions } from "./helloWorldInteractions.js";
 import { wait } from "../lib/utils.js";
 
+// Code aus Puppeteer Docs
+// https://pptr.dev/api/puppeteer.coverage
+
+function calcCoverage(coverage) {
+  let totalBytes = 0;
+  let usedBytes = 0;
+  coverage.forEach((entry) => {
+    totalBytes += entry.text.length;
+    entry.ranges.forEach((range) => {
+      usedBytes += range.end - range.start - 1;
+    });
+  });
+  return [totalBytes, usedBytes];
+}
+
 export const runCoverage = async (framework, interaction) => {
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
@@ -32,23 +47,10 @@ export const runCoverage = async (framework, interaction) => {
     page.coverage.stopCSSCoverage(),
   ]);
 
-  let totalJsBytes = 0;
-  let usedJsBytes = 0;
-  jsCoverage.forEach((entry) => {
-    totalJsBytes += entry.text.length;
-    entry.ranges.forEach((range) => {
-      usedJsBytes += range.end - range.start - 1;
-    });
-  });
-
-  let totalCssBytes = 0;
-  let usedCssBytes = 0;
-  cssCoverage.forEach((entry) => {
-    totalCssBytes += entry.text.length;
-    entry.ranges.forEach((range) => {
-      usedCssBytes += range.end - range.start - 1;
-    });
-  });
+  // console.log(JSON.stringify(jsCoverage));
+  // console.log(cssCoverage);
+  const [totalJsBytes, usedJsBytes] = calcCoverage(jsCoverage);
+  const [totalCssBytes, usedCssBytes] = calcCoverage(cssCoverage);
 
   const totalBytes = totalJsBytes + totalCssBytes;
   const usedBytes = usedJsBytes + usedCssBytes;
@@ -73,7 +75,6 @@ const frameworks = [
   "solidjs-ssr",
   "solidjs-csr",
 ];
-// const frameworks = ["solidjs-ssr", "solidjs-csr"];
 
 const interaction = true;
 const numberOfRuns = 5;
