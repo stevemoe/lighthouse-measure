@@ -15,7 +15,7 @@ export const runHelloWorldFlow = async (
   await page.goto(url, {
     waitUntil: "networkidle0",
   });
-  await wait(2000);
+  await wait(5000);
   for (let i = 0; i < runs; i++) {
     console.log(`Lighthouse Ausführung ${i} für ${url} (${cacheOption})`);
 

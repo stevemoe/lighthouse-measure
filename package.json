@@ -1,7 +1,7 @@
 {
   "name": "lighthouse",
   "version": "1.0.0",
-  "main": "guestbookApp/index.js",
+  "main": "guestbookApp/guestbookMeasure.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,10 +11,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@sitespeed.io/throttle": "^5.0.0",
+    "@sitespeed.io/throttle": "file:local_modules/@sitespeed.io/throttle",
     "chrome-launcher": "^1.1.1",
     "lighthouse": "^12.0.0",
     "puppeteer": "^22.10.0",
+    "speedtest-net": "^2.2.0",
     "unique-selector": "^0.5.0"
   },
   "devDependencies": {

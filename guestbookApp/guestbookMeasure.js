@@ -57,7 +57,7 @@ async function runLighthouse(
 
 (async () => {
   const frameworks = ["qwik", "nextjs", "react", "solidjs", "solidjs-csr"];
-  const numberOfRuns = 2;
+  const numberOfRuns = 10;
   const framework = await selectFramework(frameworks);
   // const cacheOption = await selectCacheOption();
   const cacheOptions = ["cache", "no-cache"];

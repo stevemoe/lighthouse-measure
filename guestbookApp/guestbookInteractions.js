@@ -43,8 +43,9 @@ export const runGbInteractions = async (page) => {
   await wait(2000);
 
   await page.click("#klickBurger");
-  const dashboard = await page.waitForSelector("p#linkToDashboard");
+  const dashboard = await page.waitForSelector("a#linkToDashboard");
   await dashboard.click();
-  await page.waitForNavigation();
-  await wait(1000);
+  // await page.waitForNavigation();
+  await wait(2000);
+  await page.click("#klickHome");
 };
