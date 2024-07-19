@@ -26,7 +26,7 @@ Mit IPv6 wird die Version aus local_modules benötigt. (https://github.com/sites
 Interaktionen auf den Websites über Puppeteer.
 Installations-Anleitung auf: https://pptr.dev
 
-### Coverage
+## Coverage
 
 Ausgabe der Ergebnisse als Einzelmessungen und als Durchschnittswerte in CSV-Dateien.
 
