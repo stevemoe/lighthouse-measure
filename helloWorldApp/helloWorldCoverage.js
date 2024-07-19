@@ -37,6 +37,8 @@ export const runCoverage = async (framework, interaction) => {
     waitUntil: "networkidle0",
   });
 
+  await page.waitForSelector("#klick1");
+
   if (interaction) {
     await runHwInteractions(page);
     await wait(1000);
@@ -76,10 +78,10 @@ const frameworks = [
   "solidjs-csr",
 ];
 
-const interaction = true;
+const interaction = false;
 const numberOfRuns = 5;
 for (let framework of frameworks) {
-  const outputFolder = `/Users/stefan/Library/Mobile Documents/com~apple~CloudDocs/Studium Media Engineering/Bachelorarbeit/Messwerte/HelloWorldApps/${framework}/coverage_2/${interaction ? "with_interaction" : "page_load"}`;
+  const outputFolder = `output/${framework}/coverage/${interaction ? "with_interaction" : "page_load"}`;
   let meansTotal = [];
   let meansUnused = [];
   for (let i = 0; i < numberOfRuns; i++) {

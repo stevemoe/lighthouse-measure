@@ -45,8 +45,6 @@ const runCoverage = async (framework, interaction) => {
     page.coverage.stopCSSCoverage(),
   ]);
 
-  console.log(JSON.stringify(jsCoverage));
-  // console.log(cssCoverage);
   const [totalJsBytes, usedJsBytes] = calcCoverage(jsCoverage);
   const [totalCssBytes, usedCssBytes] = calcCoverage(cssCoverage);
 
@@ -68,13 +66,15 @@ const runCoverage = async (framework, interaction) => {
 
 const frameworks = ["qwik", "nextjs", "react", "solidjs", "solidjs-csr"];
 
-const interaction = true;
+const interaction = false;
+const numberOfRuns = 5;
 
 for (let framework of frameworks) {
-  for (let i = 0; i < 5; i++) {
+  const outputFolder = `/Users/stefan/Library/Mobile Documents/com~apple~CloudDocs/Studium Media Engineering/Bachelorarbeit/Messwerte/Interactive App/${framework}/coverage/${interaction ? "with_interaction" : "page_load"}`;
+  let meansTotal = [];
+  let meansUnused = [];
+  for (let i = 0; i < numberOfRuns; i++) {
     console.log(`Running coverage for ${framework}`);
-    const outputFolder = `/Users/stefan/Library/Mobile Documents/com~apple~CloudDocs/Studium Media Engineering/Bachelorarbeit/Messwerte/Interactive App/${framework}/coverage/${interaction ? "with_interaction" : "page_load"}`;
-
     const coverageData = await runCoverage(framework, interaction);
     const csvData = [
       [
@@ -102,7 +102,8 @@ for (let framework of frameworks) {
         `${(((coverageData.totalBytes - coverageData.usedBytes) / coverageData.totalBytes) * 100).toFixed(2)} %`,
       ],
     ];
-
+    meansTotal.push(coverageData.totalBytes);
+    meansUnused.push(coverageData.totalBytes - coverageData.usedBytes);
     const csvContent = csvData.map((e) => e.join(",")).join("\n");
 
     if (!fs.existsSync(outputFolder)) {
@@ -113,4 +114,17 @@ for (let framework of frameworks) {
       csvContent,
     );
   }
+  const meanCsvData = [
+    ["Mean Total Bytes", "Mean Unused Bytes"],
+    [
+      meansTotal.reduce((a, b) => a + b, 0) / numberOfRuns,
+      meansUnused.reduce((a, b) => a + b, 0) / numberOfRuns,
+    ],
+  ];
+  const meanCsvContent = meanCsvData.map((e) => e.join(",")).join("\n");
+
+  fs.writeFileSync(
+    `${outputFolder}/${framework}-mean-coverage-${interaction ? "with_interaction" : "page_load"}-${getCurrentTimestamp()}.csv`,
+    meanCsvContent,
+  );
 }

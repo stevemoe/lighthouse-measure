@@ -1,6 +1,6 @@
 import fs from "fs";
 import { getLhrFilenamePrefix } from "lighthouse/report/generator/file-namer.js";
-import { runInteractiveFlow } from "./lighthouseFlow.js";
+import { runInteractiveFlow } from "./interactiveFlow.js";
 import * as throttle from "@sitespeed.io/throttle";
 import {
   selectFramework,
@@ -14,7 +14,7 @@ async function runLighthouse(
   numberOfRuns,
 ) {
   const url = `https://${framework}-interactive.vercel.app/`;
-  const outputFolder = `/Users/stefan/Library/Mobile Documents/com~apple~CloudDocs/Studium Media Engineering/Bachelorarbeit/Messwerte/Interactive App/${framework}/${networkSpeed}/${cacheOption}`;
+  const outputFolder = `output/${framework}/${networkSpeed}/${cacheOption}`;
   const lighthouseConfig = {
     config: {
       extends: "lighthouse:default",
@@ -60,12 +60,12 @@ async function runLighthouse(
   const numberOfRuns = 10;
   const framework = await selectFramework(frameworks);
   // const cacheOption = await selectCacheOption();
-  const cacheOptions = ["cache", "no-cache"];
-  // const cacheOptions = ["no-cache"];
+  // const cacheOptions = ["cache", "no-cache"];
+  const cacheOptions = ["no-cache"];
+  // const cacheOptions = ["cache"];
   const throttlingOption = await selectThrottlingOption();
   console.log(throttlingOption);
   await throttle.start(throttlingOption[1]);
-  // try {
   for (const cacheOption of cacheOptions) {
     console.log(
       `Testing ${framework} with ${cacheOption} and ${throttlingOption[0]}`,
@@ -83,9 +83,6 @@ async function runLighthouse(
       );
     }
   }
-  // } catch (error) {
-  //   console.error("Mit Fehler abgebrochen: ", error);
-  // }
   await throttle.stop();
   console.log("Throttle stopped");
 })();

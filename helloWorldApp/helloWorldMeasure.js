@@ -12,9 +12,16 @@ async function runLighthouse(
   cacheOption,
   networkSpeed,
   numberOfRuns,
+  local,
+  port,
 ) {
-  const url = `https://${framework}-hello-world.vercel.app/`;
-  const outputFolder = `/Users/stefan/Library/Mobile Documents/com~apple~CloudDocs/Studium Media Engineering/Bachelorarbeit/Messwerte/HelloWorldApps/${framework}/${networkSpeed}/${cacheOption}`;
+  let url = `https://${framework}-hello-world.vercel.app/`;
+  let outputFolder = `output/${framework}/${networkSpeed}/${cacheOption}/page_load`;
+  if (local) {
+    url = `http://localhost:${port}`;
+    outputFolder = `output/HelloWorldApps/local/${framework}/${networkSpeed}/${cacheOption}/page_load`;
+  }
+
   const lighthouseConfig = {
     config: {
       extends: "lighthouse:default",
@@ -63,34 +70,50 @@ async function runLighthouse(
     "solidjs-ssr",
     "solidjs-csr",
   ];
-  const numberOfRuns = 10;
+  const localPorts = {
+    "qwik-ssr": 4173,
+    "nextjs-ssr": 3001,
+    "react-csr": 3002,
+    "solidjs-ssr": 3003,
+    "solidjs-csr": 3004,
+  };
+  const numberOfRuns = 1;
+  const local = false;
   const framework = await selectFramework(frameworks);
   // const cacheOption = await selectCacheOption();
+  // const cacheOptions = ["cache", "no-cache"];
   const cacheOptions = ["cache", "no-cache"];
   const throttlingOption = await selectThrottlingOption();
   console.log(throttlingOption);
   await throttle.start(throttlingOption[1]);
-  // try {
   for (const cacheOption of cacheOptions) {
     console.log(
       `Testing ${framework} with ${cacheOption} and ${throttlingOption[0]}`,
     );
     if (framework === "alle") {
       for (const fw of frameworks) {
-        await runLighthouse(fw, cacheOption, throttlingOption[0], numberOfRuns);
+        const port = localPorts[fw];
+        await runLighthouse(
+          fw,
+          cacheOption,
+          throttlingOption[0],
+          numberOfRuns,
+          local,
+          port,
+        );
       }
     } else {
+      const port = localPorts[framework];
       await runLighthouse(
         framework,
         cacheOption,
         throttlingOption[0],
         numberOfRuns,
+        local,
+        port,
       );
     }
   }
-  // } catch (error) {
-  //   console.error("Mit Fehler abgebrochen: ", error);
-  // }
   await throttle.stop();
   console.log("Throttle stopped");
 })();

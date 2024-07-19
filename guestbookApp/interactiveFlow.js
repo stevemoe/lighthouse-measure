@@ -3,16 +3,13 @@ import { startFlow } from "lighthouse";
 import { clearSiteData, wait } from "../lib/utils.js";
 import { runGbInteractions } from "./guestbookInteractions.js";
 
-// const url = 'https://nextjs-interactive.vercel.app/';
-const url = "https://qwik-interactive.vercel.app/";
-
 export const runInteractiveFlow = async (
   url,
   lighthouseConfig,
   cacheOption,
   runs,
 ) => {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
   const flow = await startFlow(page, lighthouseConfig);
 
@@ -35,7 +32,7 @@ export const runInteractiveFlow = async (
     await flow.endTimespan();
   }
 
-  await flow.startTimespan();
+  await flow.startTimespan(); // zu Testzwecken
   await page.click("#klickExpensive");
   await page.waitForSelector("#calcReady");
   await wait(2000);
